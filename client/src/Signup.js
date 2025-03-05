@@ -21,6 +21,7 @@ const Signup = () => {
   };
 
   return (
+    <div className="contaner">
     <div className="signup-container">
       <h2>Signup</h2>
       <input type="text" placeholder="Name" onChange={(e) => setName(e.target.value)} />
@@ -28,6 +29,7 @@ const Signup = () => {
       <input type="password" placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
       <button onClick={handleSignup}>Signup</button>
     </div>
+  </div>
   );
 };
 
