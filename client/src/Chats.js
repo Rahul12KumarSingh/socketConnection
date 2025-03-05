@@ -10,35 +10,51 @@ const Chats = ({ user }) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
 
+  // Fetch all user chats when component mounts
   useEffect(() => {
     axios.get(`http://localhost:5000/chats/${user.id}`).then((res) => setChats(res.data));
   }, []);
 
-  useEffect(() => {
-      
-    socket.on("receiveMessage", (msg) => {
-      console.log("msg : " , msg);
-      setMessages((prev) => [...prev, msg]);
-    });
-  
-    return () => socket.off("receiveMessage");
-  }) ;
-  
+  // Fetch messages when a chat is selected
   const selectChat = (chatId) => {
-    setSelectedChat(chatId);
     socket.emit("joinChat", chatId);
 
-    axios.get(`http://localhost:5000/messages/${chatId}`).then((res) => setMessages(res.data));
+    axios.get(`http://localhost:5000/messages/${chatId}`).then((res) => {
+      setMessages(res.data);
+    });
+
+    setSelectedChat(chatId);
   };
 
-  const sendMessage = async() => {
+  // Listen for new messages
+  useEffect(() => {
+    
+    const handleNewMessage = (msg) => {
+      console.log("New Message Received:", msg);
+     
+      setMessages((prevMessages) => [...prevMessages, msg]); 
+    };
 
-    //for creating the new message inside the database...
-    const res = await  axios.post("http://localhost:5000/messages/send", { chatId: selectedChat, senderId: user.id, content: newMessage });
+    socket.on("receiveMessage", handleNewMessage);
 
-    //for sending the message to the socket...
-    socket.emit("sendMessage", { chatId: selectedChat, senderId: user.id, content: newMessage });
+    return () => {
+      socket.off("receiveMessage", handleNewMessage); // Cleanup listener
+    };
+  }, []); 
 
+  // Send Message
+  const sendMessage = async () => {
+    if (!newMessage.trim()) return;
+
+    const res = await axios.post("http://localhost:5000/messages/send", {
+      chatId: selectedChat,
+      senderId: user.id,
+      content: newMessage,
+    });
+
+    socket.emit("sendMessage", res.data); 
+
+    setMessages((prev) => [...prev, res.data]); 
     setNewMessage("");
   };
 
@@ -50,14 +66,18 @@ const Chats = ({ user }) => {
           <p>{chat.name}</p>
         </div>
       ))}
-      
+
       {selectedChat && (
         <div>
           <h3>Messages</h3>
           {messages.map((msg, i) => (
             <p key={i}>{msg.content}</p>
           ))}
-          <input type="text" value={newMessage} onChange={(e) => setNewMessage(e.target.value)} />
+          <input
+            type="text" 
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+          />
           <button onClick={sendMessage}>Send</button>
         </div>
       )}
