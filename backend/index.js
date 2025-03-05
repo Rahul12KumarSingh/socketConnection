@@ -31,9 +31,7 @@ io.on("connection", (socket) => {
   socket.on("sendMessage", (data) => {
     console.log("Message received to server :", data);
 
-    socket.to(data.chatId).emit("receiveMessage", data.content);
-
-    
+    socket.to(data.chatId).emit("receiveMessage", data);
   });
 
   socket.on("disconnect", () => console.log("User disconnected"));
