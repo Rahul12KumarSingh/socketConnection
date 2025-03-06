@@ -1,5 +1,9 @@
 const express = require("express");
 const Message = require("../models/message");
+const ChatUser = require("../models/chatuser");
+
+const sequelize = require("../config/database");
+const { Op } = require("sequelize");
 
 const router = express.Router();
 
@@ -8,6 +12,14 @@ router.post("/send", async (req, res) => {
   try {
     const { chatId, senderId, content } = req.body;
     const message = await Message.create({ chatId, senderId, content });
+
+
+    //increment the unseen count of the each user in the chat 
+    await ChatUser.update(
+      {unSeencount : sequelize.literal('unSeencount + 1')},
+      {where : {chatId : chatId , isActive : false}}
+    );
+
     res.json(message);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -16,12 +28,27 @@ router.post("/send", async (req, res) => {
 
 // Get Messages in a Group
 router.get("/:chatId", async (req, res) => {
-  try {
+  console.log("chatId : " , req.params.chatId);
+  const userId = req.query.userId;
+
+  console.log("userId : " , userId);  
+
+  try{
     const messages = await Message.findAll({ where: { chatId: req.params.chatId } });
+
+
+    //reset the unseen count of the user in the chat
+    await ChatUser.update(
+      {unSeencount : 0 , isActive : true},
+      {where : {chatId : req.params.chatId , userId : userId}}
+    );
+
     res.json(messages);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 });
+
+
 
 module.exports = router;

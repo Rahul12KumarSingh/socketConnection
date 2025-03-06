@@ -6,7 +6,7 @@ import io from "socket.io-client";
 const ENDPOINT = "http://localhost:5000";
 let socket;
 
-export default function SingleChats({ user, selectedChat }) {
+export default function SingleChats({ user, chats, setChats, selectedChat }) {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [notification, setNotification] = useState([]);
@@ -15,16 +15,41 @@ export default function SingleChats({ user, selectedChat }) {
   const fetchMessage = async () => {
     if (!selectedChat) return;
 
-    const { data } = await axios.get(`http://localhost:5000/messages/${selectedChat}`);
-    setMessages(data);
+    //join the room......
     socket.emit("joinChat", selectedChat);
+
+    const { data } = await axios.get(`http://localhost:5000/messages/${selectedChat}?userId=${user.id}`);
+
+    console.log("Messages  : ", data); 
+
+    //update the unseen message count of that chat to 0...
+    setChats((prevChats) =>
+           prevChats.map((chat) => {
+            if (chat.id === selectedChat) {
+              return { ...chat, unseenMessagesCount: 0 };
+            }
+            return chat ;
+      })
+    );
+
+    setMessages(data);
   };
+
+  const makeUserInactiveForSelectedChat = async()=>{
+    if(selectedChat)
+       await axios.put(`http://localhost:5000/chats/${selectedChat}?userId=${user.id}`);
+  }
 
   useEffect(() => {
     fetchMessage();
+
+    return () => {
+      console.log("dusra chat select ho gya hai.......");
+      makeUserInactiveForSelectedChat(selectedChat); 
+    };
   }, [selectedChat]);
 
-  // Send Message
+  //Send Message....
   const sendMessage = async () => {
     if (!newMessage) return;
 
@@ -47,16 +72,30 @@ export default function SingleChats({ user, selectedChat }) {
       console.log("Connected to server");
     });
 
-    socket.emit("setup", user);
+    socket.emit("setup", user.id);
   }, []);
 
   // Handle incoming messages
   useEffect(() => {
     const handleReceiveMessage = (msg) => {
-      if (msg.chatId !== selectedChat) {
-        setNotification((prev) => [...prev, msg]);
+      
+      console.log("Message received from server : ", msg);
+
+      if (msg.chatId !== selectedChat)
+       {
+        setChats((prevChats) =>
+          prevChats.map((chat) => {
+            if (chat.id === msg.chatId) {
+              return { ...chat, unseenMessagesCount: chat.unseenMessagesCount + 1 };
+            }
+            return chat;
+          })
+         );
+       }
+     else
+      {
+        setMessages((prev) => [...prev, msg]);
       }
-      setMessages((prev) => [...prev, msg]);
     };
 
     socket.on("receiveMessage", handleReceiveMessage);
@@ -70,9 +109,9 @@ export default function SingleChats({ user, selectedChat }) {
           <h3>Messages</h3>
           <div className="messages-list">
             {messages.map((m) => (
-             
-              <div className={m.senderId == user.id ? "apnamessage" : "dusrekamessage" } key={m.id}>
-                {m.senderId  } : {m.content}</div>
+
+              <div className={m.senderId == user.id ? "apnamessage" : "dusrekamessage"} key={m.id}>
+                {m.senderId} : {m.content}</div>
             ))}
           </div>
           <div className="message-input">

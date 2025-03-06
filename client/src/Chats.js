@@ -10,7 +10,10 @@ const Chats = ({ user }) => {
 
   // Fetch all user chats when component mounts
   useEffect(() => {
-    axios.get(`http://localhost:5000/chats/${user.id}`).then((res) => setChats(res.data));
+    axios.get(`http://localhost:5000/chats/${user.id}`).then((res) => {
+      console.log("chats info : ", res.data);
+      setChats(res.data.data)
+    }) ;
   }, [user.id]);
 
   return (
@@ -24,15 +27,16 @@ const Chats = ({ user }) => {
             <div
               key={chat.id}
               className={`chat-item ${selectedChat === chat.id ? "active" : ""}`}
-              onClick={() => setSelectedChat(chat.id)}
+              onClick={() =>  setSelectedChat(chat.id)}
             >
               <p>{chat.name}</p>
+              <p>   {chat.unseenMessagesCount}</p>
             </div>
           ))}
         </div>
 
         <div className="single-chat">
-          <SingleChats selectedChat={selectedChat} user={user} />
+          <SingleChats selectedChat={selectedChat} user={user} chats={chats} setChats={setChats} />
         </div>
       </div>
     </div>
