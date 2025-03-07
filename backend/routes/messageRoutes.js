@@ -1,6 +1,7 @@
 const express = require("express");
 const Message = require("../models/message");
 const ChatUser = require("../models/chatuser");
+const Chat = require("../models/chat");
 
 const sequelize = require("../config/database");
 const { Op } = require("sequelize");
@@ -16,9 +17,20 @@ router.post("/send", async (req, res) => {
 
     //increment the unseen count of the each user in the chat 
     await ChatUser.update(
-      {unSeencount : sequelize.literal('unSeencount + 1')},
+      {
+        unSeencount : sequelize.literal('unSeencount + 1') ,
+      },
       {where : {chatId : chatId , isActive : false}}
     );
+
+    //update the latest message in the chat
+    await Chat.update(
+      {
+        latestMessage : content ,
+      },
+      {where : {id : chatId}}
+    );
+
 
     res.json(message);
   } catch (error) {

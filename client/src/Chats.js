@@ -29,8 +29,9 @@ const Chats = ({ user }) => {
               className={`chat-item ${selectedChat === chat.id ? "active" : ""}`}
               onClick={() =>  setSelectedChat(chat.id)}
             >
-              <p>{chat.name}</p>
-              <p>   {chat.unseenMessagesCount}</p>
+              <p  style={{ fontWeight: "bold", margin: "0 0 5px 0" }}>{chat.name}</p>
+              <p style={{ margin: "0", color: "#555" }}> <span style={{ fontStyle: "italic" }}>{chat.latestMessage}</span> : <span style={{ fontWeight: "bold", color: "#d9534f" }}>{chat.    unseenMessagesCount}</span>
+              </p>
             </div>
           ))}
         </div>

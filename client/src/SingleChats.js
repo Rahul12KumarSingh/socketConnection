@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState ,  useRef  } from "react";
 import axios from "axios";
 import "./Chats.css";
 import io from "socket.io-client";
@@ -10,6 +10,8 @@ export default function SingleChats({ user, chats, setChats, selectedChat }) {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [notification, setNotification] = useState([]);
+
+  const processedMessage = useRef() ;
 
   // Fetch messages when a chat is selected
   const fetchMessage = async () => {
@@ -26,7 +28,7 @@ export default function SingleChats({ user, chats, setChats, selectedChat }) {
     setChats((prevChats) =>
            prevChats.map((chat) => {
             if (chat.id === selectedChat) {
-              return { ...chat, unseenMessagesCount: 0 };
+              return { ...chat, unseenMessagesCount: 0};
             }
             return chat ;
       })
@@ -37,16 +39,19 @@ export default function SingleChats({ user, chats, setChats, selectedChat }) {
 
   const makeUserInactiveForSelectedChat = async()=>{
     if(selectedChat)
-       await axios.put(`http://localhost:5000/chats/${selectedChat}?userId=${user.id}`);
+    {
+      console.log("makeUserInactiveForSelectedChat : ", selectedChat);
+      await axios.put(`http://localhost:5000/chats/${selectedChat}?userId=${user.id}`);
+    }
   }
 
   useEffect(() => {
     fetchMessage();
 
     return () => {
-      console.log("dusra chat select ho gya hai.......");
       makeUserInactiveForSelectedChat(selectedChat); 
     };
+
   }, [selectedChat]);
 
   //Send Message....
@@ -61,7 +66,20 @@ export default function SingleChats({ user, chats, setChats, selectedChat }) {
 
     socket.emit("sendMessage", data);
     setMessages([...messages, data]);
-    setNewMessage("");
+    
+
+    //update the latest message in the chat
+    setChats((prevChats) =>
+      prevChats.map((chat) => {
+        if (chat.id ===  selectedChat) {
+          return { ...chat , latestMessage : newMessage};
+        }
+        return chat ;
+      })
+     );
+
+     setNewMessage("");
+
   };
 
   // Socket setup
@@ -79,6 +97,10 @@ export default function SingleChats({ user, chats, setChats, selectedChat }) {
   useEffect(() => {
     const handleReceiveMessage = (msg) => {
       
+      if(processedMessage.current === msg.id)return ;
+
+      processedMessage.current = msg.id ;
+      
       console.log("Message received from server : ", msg);
 
       if (msg.chatId !== selectedChat)
@@ -86,14 +108,23 @@ export default function SingleChats({ user, chats, setChats, selectedChat }) {
         setChats((prevChats) =>
           prevChats.map((chat) => {
             if (chat.id === msg.chatId) {
-              return { ...chat, unseenMessagesCount: chat.unseenMessagesCount + 1 };
+              return { ...chat, unseenMessagesCount: chat.unseenMessagesCount + 1 , latestMessage : msg.content};
             }
-            return chat;
+            return chat ;
           })
          );
        }
      else
       {
+        setChats((prevChats) =>
+          prevChats.map((chat) => {
+            if (chat.id === msg.chatId) {
+              return { ...chat, latestMessage : msg.content};
+            }
+            return chat ;
+          })
+         );
+
         setMessages((prev) => [...prev, msg]);
       }
     };
