@@ -56,11 +56,14 @@ export default function SingleChats({ user, chats, setChats, selectedChat }) {
 
   //Send Message....
   const sendMessage = async () => {
+    console.log("user info : " , user) ;
+
     if (!newMessage) return;
 
     const { data } = await axios.post("http://localhost:5000/messages/send", {
       chatId: selectedChat,
       senderId: user.id,
+      senderName:user.name,
       content: newMessage,
     });
 
@@ -142,7 +145,7 @@ export default function SingleChats({ user, chats, setChats, selectedChat }) {
             {messages.map((m) => (
 
               <div className={m.senderId == user.id ? "apnamessage" : "dusrekamessage"} key={m.id}>
-                {m.senderId} : {m.content}</div>
+                {m.senderName} : {m.content}</div>
             ))}
           </div>
           <div className="message-input">
@@ -150,6 +153,11 @@ export default function SingleChats({ user, chats, setChats, selectedChat }) {
               type="text"
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === "Enter") {
+                  sendMessage();;
+                }
+              }}
               placeholder="Type a message..."
             />
             <button onClick={sendMessage}>Send</button>

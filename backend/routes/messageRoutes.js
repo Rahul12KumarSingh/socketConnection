@@ -11,8 +11,8 @@ const router = express.Router();
 // Send Message
 router.post("/send", async (req, res) => {
   try {
-    const { chatId, senderId, content } = req.body;
-    const message = await Message.create({ chatId, senderId, content });
+    const { chatId, senderId , senderName , content } = req.body;
+    const message = await Message.create({ chatId, senderId , senderName , content });
 
 
     //increment the unseen count of the each user in the chat 
