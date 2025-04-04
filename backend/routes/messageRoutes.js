@@ -11,9 +11,13 @@ const router = express.Router();
 // Send Message
 router.post("/send", async (req, res) => {
   try {
-    const { chatId, senderId , senderName , content } = req.body;
-    const message = await Message.create({ chatId, senderId , senderName , content });
+    const { chatId, senderId , senderName , content , documentUrl} = req.body;
 
+    console.log("documentUrl : " , documentUrl);
+
+    
+    // console.log("imgUrl : " , imgUrl)
+    const message = await Message.create({ chatId, senderId , senderName , content  , documentUrl});
 
     //increment the unseen count of the each user in the chat 
     await ChatUser.update(
@@ -23,14 +27,13 @@ router.post("/send", async (req, res) => {
       {where : {chatId : chatId , isActive : false}}
     );
 
-    //update the latest message in the chat
+    //update the latest message in the chat.....
     await Chat.update(
       {
         latestMessage : content ,
       },
       {where : {id : chatId}}
     );
-
 
     res.json(message);
   } catch (error) {
@@ -48,8 +51,7 @@ router.get("/:chatId", async (req, res) => {
   try{
     const messages = await Message.findAll({ where: { chatId: req.params.chatId } });
 
-
-    //reset the unseen count of the user in the chat
+    //reset the unseen count of the user in the chat...
     await ChatUser.update(
       {unSeencount : 0 , isActive : true},
       {where : {chatId : req.params.chatId , userId : userId}}
@@ -57,10 +59,10 @@ router.get("/:chatId", async (req, res) => {
 
     res.json(messages);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(400).json({error: error.message });
   }
 });
 
-
+//..//
 
 module.exports = router;

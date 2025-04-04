@@ -2,15 +2,39 @@ import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import "./Chats.css";
 import io from "socket.io-client";
+import MessageInputBox from "./MessageInputBox";
 
 const ENDPOINT = "http://localhost:5000";
 let socket;
 
 
 
+
+
 export default function SingleChats({ user, chats, setChats, selectedChat }) {
 
+  const renderMedia = (url) => {
+    if (!url) return null;
+  
+    const fileExtension = url.split('.').pop().toLowerCase();
+  
+    if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExtension)) {
+      return <img src={url} alt="Image" className="media-image" />;
+    } 
+    if (['mp4', 'webm', 'ogg'].includes(fileExtension)) {
+      return <video controls className="media-video">
+        <source src={url} type={`video/${fileExtension}`} />
+        Your browser does not support the video tag.
+      </video>;
+    } 
+    if (['pdf'].includes(fileExtension)) {
+      return <iframe src={url} className="media-pdf" title="PDF Document" />;
+    }
+    
+    return <a href={url} target="_blank" rel="noopener noreferrer">Download File</a>;
+  };
 
+  
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [notification, setNotification] = useState([]);
@@ -27,24 +51,6 @@ export default function SingleChats({ user, chats, setChats, selectedChat }) {
     setFile(e.target.files[0]);
   }
 
-  const uploadFile = async () => {
-    const response = await axios.get(`http://localhost:5000/generateSignedUrl?fileName=${file.name}&fileType=${file.type}`);
-
-    console.log("Response : ", response);
-
-    const { signedUrl } = response.data;
-
-    console.log("signed url : ", signedUrl);
-
-    await axios.put(signedUrl, file, {
-      headers: {
-        'Content-Type': file.type
-      },
-    });
-
-    console.log("File uploaded successfully", signedUrl.split("?")[0]);
-
-  }
 
   // Fetch messages when a chat is selected
   const fetchMessage = async () => {
@@ -87,21 +93,20 @@ export default function SingleChats({ user, chats, setChats, selectedChat }) {
   }, [selectedChat]);
 
   //Send Message....
-  const sendMessage = async () => {
-    console.log("user info : ", user);
+  const sendMessage = async (text, docsUrl) => {
+    if (!text && !docsUrl) return;
 
-    if (!newMessage) return;
-
+    //upload the images at the cloud storage....
     const { data } = await axios.post("http://localhost:5000/messages/send", {
       chatId: selectedChat,
       senderId: user.id,
       senderName: user.name,
-      content: newMessage,
+      content: text,
+      documentUrl: docsUrl,
     });
 
     socket.emit("sendMessage", data);
     setMessages([...messages, data]);
-
 
     //update the latest message in the chat
     setChats((prevChats) =>
@@ -114,7 +119,6 @@ export default function SingleChats({ user, chats, setChats, selectedChat }) {
     );
 
     setNewMessage("");
-
   };
 
   // Socket setup
@@ -204,66 +208,33 @@ export default function SingleChats({ user, chats, setChats, selectedChat }) {
           <h3>Messages</h3>
           <div className="messages-list">
             {messages.map((m) => (
-
               <div className={m.senderId == user.id ? "apnamessage" : "dusrekamessage"} key={m.id}>
-                {m.senderName} : {m.content}</div>
+                <div>
+                  <strong>{m?.senderName}</strong>
+
+                  {/* Check if documentUrl exists and render based on its type */}
+                  {m?.documentUrl && (
+                    <div className="document-container">
+                      {Array.isArray(m.documentUrl) ? (
+                        m.documentUrl.map((url, index) => (
+                          <div key={index} className="media-preview">
+                            {renderMedia(url)}
+                          </div>
+                        ))
+                      ) : (
+                        renderMedia(m.documentUrl)
+                      )}
+                    </div>
+                  )}
+
+                  <div>{m?.content}</div>
+                </div>
+              </div>
             ))}
           </div>
 
-          <div style={{ position: "relative", display: "inline-block" }}>
-            {downloadProgress["Rahul Resume"] !== undefined && (
-              <div
-                style={{
-                  position: "absolute",
-                  top: "0",
-                  left: "50%",
-                  transform: "translateX(-50%)",
-                  backgroundColor: "rgba(0, 0, 0, 0.7)",
-                  color: "white",
-                  padding: "5px",
-                  borderRadius: "5px",
-                  fontSize: "12px",
-                }}
-              >
-                {downloadProgress["Rahul Resume"]}% Downloaded
-              </div>
-            )}
 
-            <embed
-              src="https://storage.googleapis.com/chatappstorage/rahulfinal.pdf"
-              type="application/pdf"
-              width="150px"
-              height="150px"
-              style={{ cursor: "pointer", border: "1px solid black" }}
-              onClick={() => downloadFile("https://storage.googleapis.com/chatappstorage/rahulfinal.pdf", "Rahul Resume")}
-            />
-          </div>
-
-
-          <div className="message-input">
-
-            <input
-              type="file"
-              onChange={handleFileChange}
-            />
-
-            <button onClick={uploadFile}>Upload</button>
-
-
-
-            <input
-              type="text"
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              onKeyPress={(e) => {
-                if (e.key === "Enter") {
-                  sendMessage();;
-                }
-              }}
-              placeholder="Type a message..."
-            />
-            <button onClick={sendMessage}>Send</button>
-          </div>
+          <MessageInputBox onSend={sendMessage} />
         </>
       ) : (
         <div >No Chat Selected</div>

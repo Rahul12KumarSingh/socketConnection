@@ -9,7 +9,9 @@ const Message = sequelize.define("Message", {
   senderId: { type: DataTypes.INTEGER, allowNull: false },
   senderName:{type: DataTypes.STRING , allowNull: false},
   content: { type: DataTypes.TEXT, allowNull: false },
+  documentUrl: { type: DataTypes.JSON, allowNull: false },
 }, { timestamps: true });
+
 
 Message.belongsTo(User, { foreignKey: "senderId" });
 Message.belongsTo(Chat, { foreignKey: "chatId" });

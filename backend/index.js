@@ -10,7 +10,7 @@ const messageRoutes = require("./routes/messageRoutes");
 const {Storage} = require('@google-cloud/storage');
 
 const storage  = new Storage({
-  keyFilename: "./config/keys.json",
+  keyFilename: "./config/rock-web-453711-d5-301aac1bff36.json",
 });
 
 const bucketName = "chatappstorage"
@@ -126,6 +126,8 @@ app.get('/generateSignedUrl' , async(req , res)=>{
      res.status(500).json({error : error.message});
   }
 }) ;
+
+
 
 
 sequelize.sync().then(() => console.log("Database Synced"));

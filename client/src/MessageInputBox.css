@@ -1,0 +1,73 @@
+.chat-input-container {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background: #f1f1f1;
+    border-radius: 8px;
+    position: relative;
+}
+
+.input-box {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 20px;
+    outline: none;
+    font-size: 16px;
+    background: white;
+    min-height: 40px;
+    max-height: 100px;
+    overflow-y: auto;
+    margin-right: 10px;
+}
+
+.emoji-picker {
+    position: absolute;
+    bottom: 60px;
+    right: 50px;
+    z-index: 100;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.action-buttons {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.emoji-btn, .upload-btn, .send-btn {
+    background: none;
+    border: none;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+.image-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.preview-item {
+    position: relative;
+}
+
+.preview-item img {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 5px;
+}
+
+.preview-item button {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: red;
+    border: none;
+    color: white;
+    font-size: 12px;
+    cursor: pointer;
+    border-radius: 50%;
+}

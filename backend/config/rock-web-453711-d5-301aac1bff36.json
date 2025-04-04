@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "rock-web-453711-d5",
+  "private_key_id": "301aac1bff361a86381b9a8783fb87eafdbb4131",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDLhlaANE5+0pUF\nvKRJX43+wz4nFY6uiJ2EK9By2CNGI+o9oXfyf+h2h3ZhrnJlAS2OW608c870yu6N\nNrINtH/eiaQ5/y65ViJkAyUMKl56wwmmcp8f9GGLhpzMsKoGGUccdNbQ2to+esvC\nLvyGOGiPrk7cW2IfM1Yn9My5No5gFaCZNDSsNFJZ0PorVGRKABTKylBys/WRp2Iq\n/kIixOLmyFHENtrwDhlHUNiRkLGeTm5K3GBYVOZUrdAZ/BOn46Vv58nsr0+g4FZY\n4TxCL3/MsZYr5xrAJLKMFv4+5mC1UkNB41Ir3+BLKTFiFyy3btsv8r11AiaAZ0/F\nMph9V1nxAgMBAAECggEABQcdje883S8wlUKywElHBbsnBuomazNeyMwYSy4BuRLc\nD4e0od39DSiNiR45HzunN3QWVH775to4iG6IeYQzAHlgADrImbWCBfx55tIJIXk9\n/MmqGqz71+mMaBYZLStksVRFlkVBzPdVn0dv35T3KE2DDziGtQScpUIL6KtrWv5C\nf/cCDMeLHCpvVXo2WlWKuy0P+J3gJpIScx8UuoyLpNg6M2d58NGwnvFA9075N13g\nBu+kKaA1nMzwnwVB0VHQvIoKgVzm07nIjFtFAlDnLTOxJk+gpBka4o11U+srrFAH\n8vIlmrCvTQJuhA8UWwUkV8/wmpYS5lCxJoChcjfcHQKBgQDrPfTyKRlkho1hBaMa\nMZZfu6pXvE0HpBCCnyN2NT0nozK5xpKc/LO8hEUZWYwOKfDGp9q+M3LOcoPiJgg6\nwjG9rBMk9czlWtBugjLiGD6iOdpYlFTikvDwnePOeSghyVnMTOvfj/fz2+Y5y0Z5\nZUtlNSoSmKfPNziLWCr0ADB5gwKBgQDde+XrGqaRhx7+M4Vbt/mWlgktu/Xoo7YF\nJhke16p85vHuEUy+7oJ0sk4DwUcgAEokvcgPrjuNhl2RnaMShUxhx4CspgUDjZhS\nZBI6SeU+pOMzybsuQh1OjipZxfsHgKb9hcqcsf9TvKAtHXD4kAs18oRK9Ji48aXC\nf2ga8kWoewKBgDJH8+suzbam6+EpC0u1/aZIvogyP2S6tKy2xyWlC4VFZLpAr2XO\nvbw1qW9ZrI36ePR9PEwbQxbNc1MLPgcRKwCXnx/vSfRcDOESAz5AYGLcasc0LVCg\nh89mcCLZ0rImD4OTjXcjlqQRBIyl3lJkTFE9o9iFuJiZ/QQLvGKbB8FxAoGAII4S\nmIEdVKy4yIKIKpgbLqA1Dyzek2hk29LixF7M53kGvIh8cGAcesyunOyu6KxCOa5P\nlsZ0aHQEkt/J1XIUbRbm+fmZKRGJ/ypIZ5rvAEs6PiV7xuve5OoOnY11PYASi5c7\n1dZwAj3qiVcXgOGjVDWmbmIPhLe4NqOFiNhtlrsCgYEAs50cwFnHH6rDkpAA4vK/\n9mRrfAkQvjuzmMwFa9djltOkA/5ZWuHT4gVKv2a56ubivz4k7C2o138kf4BRqkK+\nYBszZqDFsspJ0UOg+EMJKAo1SWhl0VWSuC+XXZJEO/FeS+kLgCWZb6FceTJj1nL0\nIviIAB1myR40S9ooi4lBVq4=\n-----END PRIVATE KEY-----\n",
+  "client_email": "storage-uploader@rock-web-453711-d5.iam.gserviceaccount.com",
+  "client_id": "113469150986957308395",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/storage-uploader%40rock-web-453711-d5.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
