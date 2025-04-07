@@ -48,11 +48,11 @@ const MessageInputBox = ({ onSend, groupUser }) => {
 
 
     const handleUserSelect = (user) => {
-        const newText = text.replace(/@\w*$/, `${user.name}`);
-
+        // const newText = text.replace(/@\w*$/, `${user.name}`);
+         const newText = `${user.name} `; // Add a space after the mention
         setText((prevText) => prevText + newText);
 
-        // console.log("new user selected  : " ,{user.name , newText}) ;
+        console.log("new user selected  : " , newText); ;
 
         if (inputRef.current) {
             inputRef.current.innerText += newText;

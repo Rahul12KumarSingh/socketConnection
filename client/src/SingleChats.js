@@ -81,6 +81,10 @@ export default function SingleChats({ user, chats, setChats, selectedChat }) {
       setUserInGroup((prev) => [...prev, dataNode.User])
     })
 
+    //remove the current login user from the group...
+    console.log("userInGroup : ", userInGroup);
+
+    setUserInGroup((prev) => prev.filter((User) => User.id !== user.id))
   };
 
   const makeUserInactiveForSelectedChat = async () => {
