@@ -10,6 +10,7 @@ const Message = sequelize.define("Message", {
   senderName:{type: DataTypes.STRING , allowNull: false},
   content: { type: DataTypes.TEXT, allowNull: false },
   documentUrl: { type: DataTypes.JSON, allowNull: false },
+  tagedMember : {type : DataTypes.JSON , allowNull : false} , 
 }, { timestamps: true });
 
 

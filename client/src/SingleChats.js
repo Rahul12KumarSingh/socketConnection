@@ -8,36 +8,34 @@ const ENDPOINT = "http://localhost:5000";
 let socket;
 
 
-
-
-
 export default function SingleChats({ user, chats, setChats, selectedChat }) {
 
   const renderMedia = (url) => {
     if (!url) return null;
-  
+
     const fileExtension = url.split('.').pop().toLowerCase();
-  
+
     if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExtension)) {
       return <img src={url} alt="Image" className="media-image" />;
-    } 
+    }
     if (['mp4', 'webm', 'ogg'].includes(fileExtension)) {
       return <video controls className="media-video">
         <source src={url} type={`video/${fileExtension}`} />
         Your browser does not support the video tag.
       </video>;
-    } 
+    }
     if (['pdf'].includes(fileExtension)) {
       return <iframe src={url} className="media-pdf" title="PDF Document" />;
     }
-    
+
     return <a href={url} target="_blank" rel="noopener noreferrer">Download File</a>;
   };
 
-  
+
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [notification, setNotification] = useState([]);
+  const [userInGroup, setUserInGroup] = useState([]);
 
   const [downloadProgress, setDownloadProgress] = useState({});
 
@@ -59,7 +57,7 @@ export default function SingleChats({ user, chats, setChats, selectedChat }) {
     //join the room......
     socket.emit("joinChat", selectedChat);
 
-    const { data } = await axios.get(`http://localhost:5000/messages/${selectedChat}?userId=${user.id}`);
+    var { data } = await axios.get(`http://localhost:5000/messages/${selectedChat}?userId=${user.id}`);
 
     console.log("Messages  : ", data);
 
@@ -74,6 +72,15 @@ export default function SingleChats({ user, chats, setChats, selectedChat }) {
     );
 
     setMessages(data);
+
+
+    //fetch all the users present in this chatGroup....
+    var { data } = await axios.get(`http://localhost:5000/chats/users/${selectedChat}`);
+
+    data.map((dataNode) => {
+      setUserInGroup((prev) => [...prev, dataNode.User])
+    })
+
   };
 
   const makeUserInactiveForSelectedChat = async () => {
@@ -93,7 +100,10 @@ export default function SingleChats({ user, chats, setChats, selectedChat }) {
   }, [selectedChat]);
 
   //Send Message....
-  const sendMessage = async (text, docsUrl) => {
+  const sendMessage = async (text, docsUrl, mentionUsers) => {
+
+    console.log("mentioned users : ", mentionUsers);
+
     if (!text && !docsUrl) return;
 
     //upload the images at the cloud storage....
@@ -103,6 +113,7 @@ export default function SingleChats({ user, chats, setChats, selectedChat }) {
       senderName: user.name,
       content: text,
       documentUrl: docsUrl,
+      tagedMember: mentionUsers
     });
 
     socket.emit("sendMessage", data);
@@ -227,18 +238,27 @@ export default function SingleChats({ user, chats, setChats, selectedChat }) {
                     </div>
                   )}
 
-                  <div>{m?.content}</div>
-                </div>
+                  <div>{
+                    m?.tagedMember.map((memberId) => (
+                      <span key={memberId} className="mention-tag">
+                        @{userInGroup.find(user => user.id === memberId)?.name}
+                      </span>
+                    ))
+                  }
+                     {m.content}
+                  </div>
+              </div>
               </div>
             ))}
-          </div>
+        </div>
 
 
-          <MessageInputBox onSend={sendMessage} />
-        </>
-      ) : (
-        <div >No Chat Selected</div>
-      )}
-    </div>
+      <MessageInputBox onSend={sendMessage} groupUser={userInGroup} />
+    </>
+  ) : (
+    <div >No Chat Selected</div>
+  )
+}
+    </div >
   );
 }

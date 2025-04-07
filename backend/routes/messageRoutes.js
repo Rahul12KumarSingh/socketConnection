@@ -11,13 +11,13 @@ const router = express.Router();
 // Send Message
 router.post("/send", async (req, res) => {
   try {
-    const { chatId, senderId , senderName , content , documentUrl} = req.body;
+    const { chatId, senderId , senderName , content , documentUrl , tagedMember} = req.body;
 
     console.log("documentUrl : " , documentUrl);
 
     
     // console.log("imgUrl : " , imgUrl)
-    const message = await Message.create({ chatId, senderId , senderName , content  , documentUrl});
+    const message = await Message.create({ chatId, senderId , senderName , content  , documentUrl , tagedMember});
 
     //increment the unseen count of the each user in the chat 
     await ChatUser.update(

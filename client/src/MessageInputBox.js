@@ -1,18 +1,68 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import EmojiPicker from "emoji-picker-react";
 import "./MessageInputBox.css";
 
-const MessageInputBox = ({ onSend }) => {
+const MessageInputBox = ({ onSend, groupUser }) => {
+    console.log("groupUser : ", groupUser);
+
     const [text, setText] = useState("");
     const [Documents, setDocuments] = useState([]);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+
+    const [showUserList, setShowUserList] = useState(false);
+    const [filteredUsers, setFilteredUsers] = useState([]);
+    const [mentions, setMentions] = useState([]);
+
+
     const fileInputRef = useRef(null);
     const inputRef = useRef(null);
 
     const handleInputChange = (e) => {
         setText(e.target.innerText);
     };
+
+    useEffect(() => {
+        if (text.includes("@")) {
+            const lastWord = text.split(" ").pop();
+
+            console.log("lastword : " , lastWord) ;
+
+            if (lastWord.startsWith("@")) {
+                const serchKeyword = lastWord.slice(1).toLowerCase();
+
+                setFilteredUsers(
+                    groupUser.filter((user) => user.name.toLowerCase().includes(serchKeyword))
+                );
+
+                setShowUserList(true);
+                
+            } else {
+                setShowUserList(false);
+            }
+        } else {
+            setShowUserList(false);
+        }
+
+    }, [text]);
+
+
+    const handleUserSelect = (user) => {
+        const newText = text.replace(/@\w*$/, `${user.name}`);
+
+        setText((prevText) => prevText + newText);
+
+        // console.log("new user selected  : " ,{user.name , newText}) ;
+
+        if (inputRef.current) {
+            inputRef.current.innerText += newText;
+        }
+
+        setMentions((prev) => [...prev, user]);
+        setShowUserList(false);
+    }
+
+
 
     const handleFileChange = (e) => {
         const files = Array.from(e.target.files);
@@ -34,17 +84,17 @@ const MessageInputBox = ({ onSend }) => {
     };
 
     const addEmoji = (emojiObject) => {
-        const emoji = emojiObject.emoji; 
-        setText((prevText) => prevText + emoji); 
-    
+        const emoji = emojiObject.emoji;
+        setText((prevText) => prevText + emoji);
+
         if (inputRef.current) {
-            inputRef.current.innerText += emoji; 
+            inputRef.current.innerText += emoji;
         }
-    
+
         setShowEmojiPicker(false);
     };
-    
-    
+
+
 
     const uploadDocumentToGcs = async () => {
         const uploadedDocumentUrls = [];
@@ -57,13 +107,13 @@ const MessageInputBox = ({ onSend }) => {
 
                 const { signedUrl } = response.data;
 
-                console.log("signedUrl : " , signedUrl)  ;
-            
+                console.log("signedUrl : ", signedUrl);
+
                 await axios.put(signedUrl, file, {
                     headers: { "Content-Type": file.type },
                 });
-               
-                const publicUrl = signedUrl.split("?")[0];                 
+
+                const publicUrl = signedUrl.split("?")[0];
                 uploadedDocumentUrls.push(publicUrl);
 
             } catch (error) {
@@ -78,15 +128,31 @@ const MessageInputBox = ({ onSend }) => {
     const handleSend = async () => {
         if (text.trim() || Documents.length > 0) {
             const uploadedDocumentUrls = await uploadDocumentToGcs();
-            console.log("uploadedDocumentUrls : ", uploadedDocumentUrls) ;
+            // console.log("uploadedDocumentUrls : ", uploadedDocumentUrls);
 
-            onSend(text, uploadedDocumentUrls);
+            console.log("mentions : ", mentions);
+
+            const mentionedNames = mentions.map((user) => user.name);
+
+            let filteredText = text ;
+
+            mentionedNames.forEach((name) => {
+                const regex = new RegExp(`@${name}\\b`, "g");  
+                filteredText = filteredText.replace(regex,"").trim() ;
+            });
+
+            const mentionUsers = mentions.map((user) => user.id);
+
+            onSend(filteredText , uploadedDocumentUrls,
+                mentionUsers
+            );
 
             setText("");
             setDocuments([]);
             if (inputRef.current) {
                 inputRef.current.innerText = "";
             }
+            setMentions([]);
         }
     };
 
@@ -102,11 +168,25 @@ const MessageInputBox = ({ onSend }) => {
                 data-placeholder="Type a message..."
             />
 
-            {showEmojiPicker && (
-                <div className="emoji-picker">
-                    <EmojiPicker onEmojiClick={addEmoji} />
-                </div>
-            )}
+            {
+                showUserList && (
+                    <ul className="mention-list">
+                        {filteredUsers.map((user) => (
+                            <li key={user.id} onClick={() => handleUserSelect(user)}>
+                                @{user.name}
+                            </li>
+                        ))}
+                    </ul>
+                )
+            }
+
+            {
+                showEmojiPicker && (
+                    <div className="emoji-picker">
+                        <EmojiPicker onEmojiClick={addEmoji} />
+                    </div>
+                )
+            }
 
             <input
                 type="file"
@@ -137,8 +217,12 @@ const MessageInputBox = ({ onSend }) => {
                     </div>
                 ))}
             </div>
+
         </div>
     );
 };
+
+
+
 
 export default MessageInputBox;

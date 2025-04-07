@@ -57,7 +57,7 @@ router.post("/create", async (req, res) => {
 // });
 
 
-// Get All chats with unseen messages count
+// Get All chats with unseen messages count.....
 router.get("/:userId" , async (req , res) => {
      try {
       const userId = req.params.userId;
@@ -116,6 +116,27 @@ router.put("/:chatId" , async (req , res) => {
   }catch (error) {
     res.status(400).json({ error: error.message });
   }
+}) 
+
+
+//finding all the  user present in the chat....
+router.get("/users/:chatId" , async (req , res) => {
+  try {
+    const chatId = req.params.chatId;
+    console.log("chatId : " , chatId);
+
+    const users = await ChatUser.findAll({
+      where: { chatId },
+      attributes: [],
+      include: [{ model: User, attributes: ["id", "name"] }],
+    });
+
+    res.json(users);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
 }) ;
+
+
 
 module.exports = router ;

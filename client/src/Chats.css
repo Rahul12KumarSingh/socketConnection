@@ -135,7 +135,10 @@
     word-wrap: break-word; /* Wrap long text */
   }
 
-
+  .mention-tag{
+    padding-left: 3px;
+    color:hwb(127 3% 9%)
+  }
 
   /* documents styles.... */
   .media-image {
